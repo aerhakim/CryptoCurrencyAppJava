@@ -34,9 +34,6 @@
             android:visibility="visible"
             android:orientation="horizontal"
             android:layout_height="180dp">
-
-
-
         </androidx.viewpager2.widget.ViewPager2>
 
         <TextView
