@@ -30,10 +30,10 @@ public class AppViewModel extends AndroidViewModel {
         super(application);
         getViewPagerData();
     }
-
-    public Future<Observable<AllMarketModel>> marketFutureCall(){
+    public Future <Observable<AllMarketModel>> marketFutureCall(){
         return appRepository.marketListFutureCall();
     }
+
 
 
 

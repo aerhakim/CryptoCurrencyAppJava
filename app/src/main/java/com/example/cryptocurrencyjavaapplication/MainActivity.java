@@ -1,5 +1,9 @@
 package com.example.cryptocurrencyjavaapplication;
 
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkRequest;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -17,8 +21,11 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.cryptocurrencyjavaapplication.databinding.ActivityMainBinding;
 import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.AllMarketModel;
 import com.example.cryptocurrencyjavaapplication.viewmodel.AppViewModel;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -32,6 +39,12 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
+
+    @Inject
+    ConnectivityManager connectivityManager;
+
+    @Inject
+    NetworkRequest networkRequest;
 
     ActivityMainBinding binding;
     NavHostFragment navHostFragment;
@@ -47,13 +60,35 @@ public class MainActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         drawerLayout = binding.drawerLayout;
 
-        // start observe
         compositeDisposable = new CompositeDisposable();
 
         setAppViewModel();
         setupNavigationComponent();
-        callListApiRequest();
+        checkConnection();
     }
+
+    private void checkConnection(){
+        ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback(){
+            @Override
+            public void onAvailable(@androidx.annotation.NonNull Network network) {
+                Log.e("TAG", "onAvailable: " );
+                callListApiRequest();
+            }
+
+            @Override
+            public void onLost(@androidx.annotation.NonNull Network network) {
+                Log.e("TAG", "onLost: " );
+                Snackbar.make(binding.mainCon,"No Internet, Please Connect again",4000).show();
+            }
+        };
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            connectivityManager.registerDefaultNetworkCallback(networkCallback);
+        }else{
+            connectivityManager.registerNetworkCallback(networkRequest,networkCallback);
+        }
+    }
+
 
     private void setAppViewModel() {
         appViewModel = new ViewModelProvider(this).get(AppViewModel.class);
@@ -68,27 +103,22 @@ public class MainActivity extends AppCompatActivity {
                 .subscribe(new Observer<AllMarketModel>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
-
                         compositeDisposable.add(d);
                     }
 
                     @Override
                     public void onNext(@NonNull AllMarketModel allMarketModel) {
-
                         Log.e("TAG", "onNext: " + allMarketModel.getRootData().getCryptoCurrencyList().get(0).getName() );
                         Log.e("TAG", "onNext: " + allMarketModel.getRootData().getCryptoCurrencyList().get(1).getName() );
 
                     }
-
                     @Override
                     public void onError(@NonNull Throwable e) {
-
-                        Log.e("TAG", "onError: ");
+                        Log.e("TAG", "onError: " , e);
                     }
 
                     @Override
                     public void onComplete() {
-
                         Log.e("TAG", "onComplete: " );
                     }
                 });
@@ -113,8 +143,6 @@ public class MainActivity extends AppCompatActivity {
 //        binding.bottomBar.setupWithNavController(menu, navController)
     }
 
-
-    // when main activity destroyed, finish observable
     @Override
     protected void onDestroy() {
         super.onDestroy();
