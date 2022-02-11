@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.cryptocurrencyjavaapplication.R;
 import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.AllMarketModel;
 import com.example.cryptocurrencyjavaapplication.repository.AppRepository;
+import com.example.cryptocurrencyjavaapplication.room.entity.MarketListEntity;
 
 import java.util.ArrayList;
 import java.util.concurrent.Future;
@@ -16,6 +17,7 @@ import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
 
 @HiltViewModel
@@ -34,6 +36,12 @@ public class AppViewModel extends AndroidViewModel {
         return appRepository.marketListFutureCall();
     }
 
+    public void insertAllMarket(AllMarketModel allMarketModel){
+        appRepository.insertAllMarket(allMarketModel);
+    }
+    public Flowable<MarketListEntity> getAllMarketData(){
+        return appRepository.getAllMarketData();
+    }
 
 
 

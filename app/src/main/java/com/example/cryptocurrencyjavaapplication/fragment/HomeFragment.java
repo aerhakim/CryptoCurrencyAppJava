@@ -2,6 +2,7 @@ package com.example.cryptocurrencyjavaapplication.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,13 +25,21 @@ import com.example.cryptocurrencyjavaapplication.MainActivity;
 import com.example.cryptocurrencyjavaapplication.R;
 import com.example.cryptocurrencyjavaapplication.adapter.sliderImageAdapter;
 import com.example.cryptocurrencyjavaapplication.databinding.FragmentHomeBinding;
+import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.AllMarketModel;
+import com.example.cryptocurrencyjavaapplication.room.entity.MarketListEntity;
 import com.example.cryptocurrencyjavaapplication.viewmodel.AppViewModel;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
+@AndroidEntryPoint
 public class HomeFragment extends Fragment {
     FragmentHomeBinding binding;
     MainActivity mainActivity;
@@ -53,12 +62,13 @@ public class HomeFragment extends Fragment {
 
         appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
         setupViewPager2();
+        getAllMarketDataFromDb();
 
         return binding.getRoot();
     }
 
 
-    private void setupViewPager2(){
+    private void setupViewPager2() {
 
         appViewModel.getMutableLiveData().observe((LifecycleOwner) getActivity(), new Observer<ArrayList<Integer>>() {
             @Override
@@ -69,6 +79,23 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
+    private void getAllMarketDataFromDb() {
+        Disposable disposable = appViewModel.getAllMarketData()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<MarketListEntity>() {
+                    @Override
+                    public void accept(MarketListEntity marketListEntity) throws Throwable {
+
+                        AllMarketModel allMarketModel = marketListEntity.getAllMarketModel();
+                        Log.e("TAG", "onAccept: " + allMarketModel.getRootData().getCryptoCurrencyList().get(0).getName() );
+                        Log.e("TAG", "onAccept: " + allMarketModel.getRootData().getCryptoCurrencyList().get(1).getName() );
+
+                    }
+                });
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -81,7 +108,7 @@ public class HomeFragment extends Fragment {
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(R.id.homeFragment).setOpenableLayout(mainActivity.drawerLayout).build();
 
         Toolbar toolbar = view.findViewById(R.id.toolbar);
-        NavigationUI.setupWithNavController(toolbar,navController,appBarConfiguration);
+        NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
 
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
             @Override
