@@ -23,18 +23,23 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.cryptocurrencyjavaapplication.MainActivity;
 import com.example.cryptocurrencyjavaapplication.R;
+import com.example.cryptocurrencyjavaapplication.adapter.TopCoinRvAdapter;
 import com.example.cryptocurrencyjavaapplication.adapter.sliderImageAdapter;
 import com.example.cryptocurrencyjavaapplication.databinding.FragmentHomeBinding;
 import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.AllMarketModel;
+import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.DataItem;
 import com.example.cryptocurrencyjavaapplication.room.entity.MarketListEntity;
 import com.example.cryptocurrencyjavaapplication.viewmodel.AppViewModel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -44,6 +49,11 @@ public class HomeFragment extends Fragment {
     FragmentHomeBinding binding;
     MainActivity mainActivity;
     AppViewModel appViewModel;
+    TopCoinRvAdapter topCoinRvAdapter;
+
+    public List<String> top_want = Arrays.asList("BTC","ETH","BNB","ADA","XRP","DOGE","DOT","UNI","LTC","LINK");
+
+    CompositeDisposable compositeDisposable;
 
     @Inject
     String name;
@@ -61,6 +71,7 @@ public class HomeFragment extends Fragment {
         binding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.fragment_home, container, false);
 
         appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
+        compositeDisposable = new CompositeDisposable();
         setupViewPager2();
         getAllMarketDataFromDb();
 
@@ -89,11 +100,30 @@ public class HomeFragment extends Fragment {
                     public void accept(MarketListEntity marketListEntity) throws Throwable {
 
                         AllMarketModel allMarketModel = marketListEntity.getAllMarketModel();
-                        Log.e("TAG", "onAccept: " + allMarketModel.getRootData().getCryptoCurrencyList().get(0).getName() );
-                        Log.e("TAG", "onAccept: " + allMarketModel.getRootData().getCryptoCurrencyList().get(1).getName() );
+//                        Log.e("TAG", "onAccept: " + allMarketModel.getRootData().getCryptoCurrencyList().get(0).getName() );
+//                        Log.e("TAG", "onAccept: " + allMarketModel.getRootData().getCryptoCurrencyList().get(1).getName() );
+                        ArrayList<DataItem> top10 = new ArrayList<>();
+                        for (int i = 0;i < allMarketModel.getRootData().getCryptoCurrencyList().size();i++){
+                            for (int j = 0; j<top_want.size();j++){
+                                String coin_name = top_want.get(j);
+                                if (allMarketModel.getRootData().getCryptoCurrencyList().get(i).getSymbol().equals(coin_name)){
+                                    DataItem dataItem = allMarketModel.getRootData().getCryptoCurrencyList().get(i);
+                                    top10.add(dataItem);
+                                }
+                            }
+                        }
 
+                        if (binding.TopCoinRv.getAdapter() != null) {
+                            topCoinRvAdapter = (TopCoinRvAdapter) binding.TopCoinRv.getAdapter();
+                            topCoinRvAdapter.updateData(top10);
+                        } else {
+                            topCoinRvAdapter = new TopCoinRvAdapter(top10);
+                            binding.TopCoinRv.setAdapter(topCoinRvAdapter);
+                        }
                     }
                 });
+        compositeDisposable.add(disposable);
+
     }
 
     @Override
