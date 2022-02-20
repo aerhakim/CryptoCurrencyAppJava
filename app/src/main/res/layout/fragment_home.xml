@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -9,48 +9,49 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/homeCon"
-        android:background="#120832"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#120832"
         tools:context=".fragment.HomeFragment">
 
         <include
             android:id="@+id/included"
+            layout="@layout/toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            layout="@layout/toolbar_layout"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
 
             />
 
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPagerImageSlider"
-            app:layout_constraintTop_toBottomOf="@id/included"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             android:layout_width="match_parent"
-            android:visibility="visible"
+            android:layout_height="180dp"
             android:orientation="horizontal"
-            android:layout_height="180dp">
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/included">
+
         </androidx.viewpager2.widget.ViewPager2>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/topMarketCon"
-            app:layout_constraintTop_toBottomOf="@id/viewPagerImageSlider"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/rv_item_bg"
             android:layout_width="match_parent"
-            android:layout_height="100dp">
+            android:layout_height="100dp"
+            android:background="@drawable/rv_item_bg"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/viewPagerImageSlider">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/TopCoinRv"
                 android:layout_width="match_parent"
-                android:layoutAnimation="@anim/layout_anim"
                 android:layout_height="match_parent"
+                android:layoutAnimation="@anim/layout_anim"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -58,6 +59,82 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@drawable/rv_item_bg"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/topMarketCon">
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/conloseindicator"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@id/viewPager2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/congainindicator"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <View
+                    android:id="@+id/topLoseIndicator"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/toplosers_bg"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/congainindicator"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@id/viewPager2"
+                app:layout_constraintEnd_toStartOf="@id/conloseindicator"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <View
+                    android:id="@+id/topGainIndicator"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/topgain_bg"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tablayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#00FFFFFF"
+                app:layout_constraintBottom_toTopOf="@id/viewPager2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tabIndicatorColor="#00FFFFFF"
+                app:tabSelectedTextColor="#FFFFFF"
+                app:tabTextColor="#7AFFFFFF"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager2"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tablayout" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

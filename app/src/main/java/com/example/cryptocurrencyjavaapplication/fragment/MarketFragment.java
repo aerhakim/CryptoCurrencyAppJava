@@ -1,6 +1,7 @@
 package com.example.cryptocurrencyjavaapplication.fragment;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -21,12 +22,14 @@ import android.view.ViewGroup;
 import com.example.cryptocurrencyjavaapplication.MainActivity;
 import com.example.cryptocurrencyjavaapplication.R;
 import com.example.cryptocurrencyjavaapplication.databinding.FragmentMarketBinding;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 
 public class MarketFragment extends Fragment {
 
     FragmentMarketBinding binding;
     MainActivity mainActivity;
+    CollapsingToolbarLayout collapsingToolbarLayout;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -48,19 +51,22 @@ public class MarketFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setupToolbar(view);
     }
-    private void setupToolbar(View view) {
+    private void setupToolbar(View view) { 
         NavController navController = Navigation.findNavController(view);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(R.id.marketFragment).setOpenableLayout(mainActivity.drawerLayout).build();
 
         Toolbar toolbar = view.findViewById(R.id.toolbar);
-        NavigationUI.setupWithNavController(toolbar,navController,appBarConfiguration);
+        collapsingToolbarLayout = view.findViewById(R.id.collapsing_market_tb);
+        NavigationUI.setupWithNavController(collapsingToolbarLayout,toolbar,navController,appBarConfiguration);
 
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
             @Override
             public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
                if (destination.getId()==R.id.marketFragment){
+                   collapsingToolbarLayout.setTitleEnabled(false);
                    toolbar.setNavigationIcon(R.drawable.ic_baseline_sort_24);
                    toolbar.setTitle("Market");
+                   toolbar.setTitleTextColor(Color.WHITE);
                }
 
             }
