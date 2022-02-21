@@ -82,14 +82,14 @@ public class TopGainLoseFragment extends Fragment {
                         //if page was top Gainers
                         if (pos == 0){
                             //get 10 last Item
-                            for (int i = 0;i < 100;i++){
+                            for (int i = 0;i < 10;i++){
                                 dataItems.add(data.get(data.size() - 1 - i));
                             }
 
                             //if page was top Losers
                         }else if (pos == 1){
                             //get 10 first Item
-                            for (int i = 0;i < 100;i++){
+                            for (int i = 0;i < 10;i++){
                                 dataItems.add(data.get(i));
                             }
                         }
