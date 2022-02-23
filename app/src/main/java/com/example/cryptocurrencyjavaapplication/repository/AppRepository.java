@@ -3,8 +3,10 @@ package com.example.cryptocurrencyjavaapplication.repository;
 import android.util.Log;
 
 import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.AllMarketModel;
+import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.CryptoMarketDataModel;
 import com.example.cryptocurrencyjavaapplication.retrofit.RequestApi;
 import com.example.cryptocurrencyjavaapplication.room.RoomDao;
+import com.example.cryptocurrencyjavaapplication.room.entity.MarketDataEntity;
 import com.example.cryptocurrencyjavaapplication.room.entity.MarketListEntity;
 
 import java.util.concurrent.Callable;
@@ -77,6 +79,30 @@ public class AppRepository {
         return futureObservable;
     }
 
+
+    // insert collapsing bar data
+    public void insertCryptoDataMarket(CryptoMarketDataModel cryptoMarketDataModel) {
+        Completable.fromAction(() -> roomDao.insert(new MarketDataEntity(cryptoMarketDataModel)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+                });
+    }
+
     public void insertAllMarket(AllMarketModel allMarketModel){
         Completable.fromAction(() -> roomDao.insert(new MarketListEntity(allMarketModel)))
                 .subscribeOn(Schedulers.io())
@@ -103,7 +129,9 @@ public class AppRepository {
         return roomDao.getAllMarketData();
     }
 
-
+    public Flowable<MarketDataEntity> getCryptoMarketData(){
+        return roomDao.getCryptoMarketData();
+    }
 
 
 }

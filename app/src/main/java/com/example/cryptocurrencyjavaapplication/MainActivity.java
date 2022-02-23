@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.PopupMenu;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,9 +21,18 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.cryptocurrencyjavaapplication.databinding.ActivityMainBinding;
 import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.AllMarketModel;
+import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.CryptoMarketDataModel;
 import com.example.cryptocurrencyjavaapplication.viewmodel.AppViewModel;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -30,9 +40,10 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
-import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -73,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
             public void onAvailable(@androidx.annotation.NonNull Network network) {
                 Log.e("TAG", "onAvailable: " );
                 callListApiRequest();
+                callCryptoMarketApiRequest();
             }
 
             @Override
@@ -89,6 +101,88 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void callCryptoMarketApiRequest() {
+        Completable.fromRunnable(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    Document pageSrc = Jsoup.connect("https://coinmarketcap.com/").get();
+
+                    Elements scrapeMarketData = pageSrc.getElementsByClass("cmc-link");
+                    String[] dominance_txt = scrapeMarketData.get(4).text().split(" ");
+
+                    // Scraping Market number of changes like (MarketcapChange,volumeChange,...)
+                    Elements ScrapeMarketChange = pageSrc.getElementsByClass("sc-27sy12-0 gLZJFn");
+                    String[] changePercent = ScrapeMarketChange.text().split(" ");
+
+                    // Scraping All span Tag
+                    Elements ScrapeChangeIcon = pageSrc.getElementsByTag("span");
+
+                    // get all span Tag wth Icon (class= caretUp and caretDown)
+                    ArrayList<String> IconList = new ArrayList();
+                    for (Element i : ScrapeChangeIcon){
+                        if (i.hasClass("icon-Caret-down") || i.hasClass("icon-Caret-up")){
+                            IconList.add(i.attr("class"));
+                        }
+                    }
+
+                    // matching - or + element of PercentChanges
+                    ArrayList<String> finalchangePercent = new ArrayList<>();
+                    for (int i = 0;i < 3;i++){
+                        if (IconList.get(i).equals("icon-Caret-up")){
+                            finalchangePercent.add(changePercent[i]);
+                        }else{
+                            finalchangePercent.add("-" + changePercent[i]);
+                        }
+                    }
+
+
+
+                    String cryptos = scrapeMarketData.get(0).text();
+                    String exchanges = scrapeMarketData.get(1).text();
+                    String market_cap = scrapeMarketData.get(2).text();
+                    String  vol_24 = scrapeMarketData.get(3).text();
+
+                    String BTC_dominance = dominance_txt[1];
+                    String ETH_dominance = dominance_txt[3];
+
+                    String MarketCap_change = finalchangePercent.get(0);
+                    String vol_change = finalchangePercent.get(1);
+                    String BTCD_change = finalchangePercent.get(2);
+
+
+                    CryptoMarketDataModel cryptoMarketDataModel = new CryptoMarketDataModel(cryptos,exchanges,market_cap,vol_24,BTC_dominance,ETH_dominance,MarketCap_change,vol_change,BTCD_change);
+
+                    appViewModel.insertCryptoDataMarket(cryptoMarketDataModel);
+                   // Log.e("TAG", "run: " + scrapeMarketData.get(0).text());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.e("TAG", "onComplete: Scrape is done" );
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+                });
+
+    }
+
 
     private void setAppViewModel() {
         appViewModel = new ViewModelProvider(this).get(AppViewModel.class);
@@ -102,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<AllMarketModel>() {
                     @Override
-                    public void onSubscribe(@NonNull Disposable d) {
+                     public void onSubscribe(@NonNull Disposable d) {
                         compositeDisposable.add(d);
                     }
 
@@ -133,6 +227,20 @@ public class MainActivity extends AppCompatActivity {
         appBarConfiguration = new AppBarConfiguration.Builder(R.id.homeFragment, R.id.marketFragment, R.id.watchListFragment).setOpenableLayout(binding.drawerLayout).build();
 
         NavigationUI.setupWithNavController(binding.navigationView, navController);
+
+        binding.navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@androidx.annotation.NonNull MenuItem item) {
+
+                if (item.getItemId() == R.id.exit){
+                    finish();
+                }else {
+                    NavigationUI.onNavDestinationSelected(item,navController);
+                    binding.drawerLayout.closeDrawers();
+                }
+                return false;
+            }
+        });
 
         setupSmoothBottomNavigation();
     }

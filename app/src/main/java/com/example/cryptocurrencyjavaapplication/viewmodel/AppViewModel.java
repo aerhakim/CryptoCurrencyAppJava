@@ -8,7 +8,9 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.cryptocurrencyjavaapplication.R;
 import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.AllMarketModel;
+import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.CryptoMarketDataModel;
 import com.example.cryptocurrencyjavaapplication.repository.AppRepository;
+import com.example.cryptocurrencyjavaapplication.room.entity.MarketDataEntity;
 import com.example.cryptocurrencyjavaapplication.room.entity.MarketListEntity;
 
 import java.util.ArrayList;
@@ -35,12 +37,18 @@ public class AppViewModel extends AndroidViewModel {
     public Future <Observable<AllMarketModel>> marketFutureCall(){
         return appRepository.marketListFutureCall();
     }
+    public void insertCryptoDataMarket(CryptoMarketDataModel cryptoMarketDataModel){
+        appRepository.insertCryptoDataMarket(cryptoMarketDataModel);
+    }
 
     public void insertAllMarket(AllMarketModel allMarketModel){
         appRepository.insertAllMarket(allMarketModel);
     }
     public Flowable<MarketListEntity> getAllMarketData(){
         return appRepository.getAllMarketData();
+    }
+    public Flowable<MarketDataEntity> getCryptoMarketData(){
+        return appRepository.getCryptoMarketData();
     }
 
 

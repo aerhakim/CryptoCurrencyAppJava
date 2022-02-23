@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +28,9 @@ import com.example.cryptocurrencyjavaapplication.R;
 import com.example.cryptocurrencyjavaapplication.adapter.marketRV_Adapter;
 import com.example.cryptocurrencyjavaapplication.databinding.FragmentMarketBinding;
 import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.AllMarketModel;
+import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.CryptoMarketDataModel;
 import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.DataItem;
+import com.example.cryptocurrencyjavaapplication.room.entity.MarketDataEntity;
 import com.example.cryptocurrencyjavaapplication.room.entity.MarketListEntity;
 import com.example.cryptocurrencyjavaapplication.viewmodel.AppViewModel;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -70,6 +73,7 @@ public class MarketFragment extends Fragment {
         setupSearchBox();
         appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
         getMarketListDataFromDb();
+        getCryptoDataFromDb();
         return binding.getRoot();
     }
 
@@ -132,6 +136,8 @@ public class MarketFragment extends Fragment {
 
     }
 
+
+
     private void getMarketListDataFromDb() {
         Disposable completable = appViewModel.getAllMarketData()
                 .subscribeOn(Schedulers.io())
@@ -160,6 +166,71 @@ public class MarketFragment extends Fragment {
                 });
 
         compositeDisposable.add(completable);
+    }
+
+    private void getCryptoDataFromDb(){
+        Disposable disposable = appViewModel.getCryptoMarketData()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<MarketDataEntity>() {
+                    @Override
+                    public void accept(MarketDataEntity marketDataEntity) throws Throwable {
+
+                        CryptoMarketDataModel cryptoMarketDataModel = marketDataEntity.getCryptoMarketModel();
+
+                        //set BTC.D on UI
+                        binding.CryptoBTCD.setText(cryptoMarketDataModel.getBtc_dominance());
+                        String[] str3 = cryptoMarketDataModel.getBtcd_change().split("%");
+                        if (Float.parseFloat(str3[0]) > 0){
+                            binding.BTCDIcon.setBackgroundResource(R.drawable.ic_baseline_arrow_drop_up_24);
+                            binding.BTCChange.setTextColor(Color.GREEN);
+                        }else if (Float.parseFloat(str3[0]) < 0){
+                            binding.BTCDIcon.setBackgroundResource(R.drawable.ic_baseline_arrow_drop_down_24);
+                            binding.BTCChange.setTextColor(Color.RED);
+                        }else {
+                            binding.BTCDIcon.setBackgroundResource(R.drawable.ic_baseline_horizontal_rule_24);
+                            binding.BTCChange.setTextColor(Color.WHITE);
+                        }
+                        binding.BTCChange.setText(cryptoMarketDataModel.getBtcd_change());
+
+
+                        //set market cap  on UI
+                        binding.CryptoMarketCap.setText(cryptoMarketDataModel.getMarketCap());
+                        // get marketcap without %
+                        String[] str = cryptoMarketDataModel.getMarketCap_change().split("%");
+                        Log.e("TAG", "accept: " + str[0]);
+                        if (Float.parseFloat(str[0]) > 0){
+                            binding.marketcapIcon.setBackgroundResource(R.drawable.ic_baseline_arrow_drop_up_24);
+                            binding.MarketCapChange.setTextColor(Color.GREEN);
+                        }else if (Float.parseFloat(str[0]) < 0){
+                            binding.marketcapIcon.setBackgroundResource(R.drawable.ic_baseline_arrow_drop_down_24);
+                            binding.MarketCapChange.setTextColor(Color.RED);
+                        }else {
+                            binding.marketcapIcon.setBackgroundResource(R.drawable.ic_baseline_horizontal_rule_24);
+                            binding.MarketCapChange.setTextColor(Color.WHITE);
+                        }
+                        binding.MarketCapChange.setText(cryptoMarketDataModel.getMarketCap_change());
+
+
+                        //set market Vol on UI
+                        binding.CryptoVolume.setText(cryptoMarketDataModel.getVol_24h());
+                        //get VolumeChange without %
+                        String[] str2 = cryptoMarketDataModel.getVol_change().split("%");
+                        if (Float.parseFloat(str2[0]) > 0){
+                            binding.VolumeIcon.setBackgroundResource(R.drawable.ic_baseline_arrow_drop_up_24);
+                            binding.VolumeChange.setTextColor(Color.GREEN);
+                        }else if (Float.parseFloat(str2[0]) < 0){
+                            binding.VolumeIcon.setBackgroundResource(R.drawable.ic_baseline_arrow_drop_down_24);
+                            binding.VolumeChange.setTextColor(Color.RED);
+                        }else {
+                            binding.VolumeIcon.setBackgroundResource(R.drawable.ic_baseline_horizontal_rule_24);
+                            binding.VolumeChange.setTextColor(Color.WHITE);
+                        }
+                        binding.VolumeChange.setText(cryptoMarketDataModel.getVol_change());
+
+                    }
+                });
+        compositeDisposable.add(disposable);
     }
 
     @Override

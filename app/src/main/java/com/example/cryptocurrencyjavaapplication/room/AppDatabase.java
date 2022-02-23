@@ -7,12 +7,15 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
+import com.example.cryptocurrencyjavaapplication.models.cryptolistmodel.CryptoMarketDataModel;
 import com.example.cryptocurrencyjavaapplication.room.converters.AllMarketModelConverter;
+import com.example.cryptocurrencyjavaapplication.room.converters.CryptoDataModelConverter;
+import com.example.cryptocurrencyjavaapplication.room.entity.MarketDataEntity;
 import com.example.cryptocurrencyjavaapplication.room.entity.MarketListEntity;
 
 
-@TypeConverters({AllMarketModelConverter.class})
-@Database(entities = {MarketListEntity.class},version = 1)
+@TypeConverters({AllMarketModelConverter.class, CryptoDataModelConverter.class})
+@Database(entities = {MarketListEntity.class, MarketDataEntity.class},version = 2)
 public abstract class AppDatabase extends RoomDatabase {
 
      private static final String Db_Name = "AppDb";
