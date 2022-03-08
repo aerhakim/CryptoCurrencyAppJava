@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -196,6 +197,13 @@ public class HomeFragment extends Fragment {
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
 
+        // set click listener for navigate profile fragment
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                return NavigationUI.onNavDestinationSelected(item,navController);
+            }
+        });
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
             @Override
             public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {

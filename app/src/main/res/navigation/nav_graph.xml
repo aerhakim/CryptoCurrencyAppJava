@@ -17,4 +17,8 @@
         android:id="@+id/watchListFragment"
         android:name="com.example.cryptocurrencyjavaapplication.fragment.WatchListFragment"
         tools:layout="@layout/fragment_watch_list" />
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.cryptocurrencyjavaapplication.fragment.ProfileFragment"
+        android:label="" />
 </navigation>
